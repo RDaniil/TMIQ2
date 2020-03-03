@@ -82,7 +82,7 @@ namespace Tmiq2.Player
         float m_footstepDistanceCounter;
 
         const float k_JumpGroundingPreventionTime = 0.2f;
-        const float k_GroundCheckDistanceInAir = 0.07f;
+        const float k_GroundCheckDistanceInAir = 0.37f;
 
         // Start is called before the first frame update
         void Start()
@@ -109,6 +109,8 @@ namespace Tmiq2.Player
             hasJumpedThisFrame = false;
             bool wasGrounded = isGrounded;
             GroundCheck();
+            Debug.Log(isGrounded ? "Grounded": "NOt grounded");
+
             // landing
             if (isGrounded && !wasGrounded)
             {
@@ -264,16 +266,23 @@ namespace Tmiq2.Player
 
         // Gets the center point of the bottom hemisphere of the character controller capsule    
         Vector3 GetCapsuleBottomHemisphere()
-        { 
+        {
             // 0.2 is required to properly cast a ray to the floor, otherwise collision is not detected.
             //TODO: Somehow fix it
-            return transform.position + (transform.up * m_Controller.radius) + new Vector3(0, 0.2f, 0);
+            Vector3 p1 = transform.position + m_Controller.center;
+            var h = m_Controller.height / 2 - m_Controller.radius;
+            p1.y -= h;
+            return p1;
         }
 
         // Gets the center point of the top hemisphere of the character controller capsule    
         Vector3 GetCapsuleTopHemisphere(float atHeight)
         {
-            return transform.position + (transform.up * (atHeight - m_Controller.radius));
+            Vector3 p1 = transform.position + m_Controller.center;
+            var p2 = p1;
+            var h = m_Controller.height / 2 - m_Controller.radius;
+            p2.y += h;
+            return p2;
         }
 
         void GroundCheck()
