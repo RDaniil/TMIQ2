@@ -51,7 +51,6 @@ namespace Tmiq2.Player
             if (CanProcessInput())
             {
                 Vector2 moveInput = inputActions.Gameplay.Move.ReadValue<Vector2>();
-                Debug.Log("moveInput" + moveInput);
 
                 var movement = new Vector3()
                 {

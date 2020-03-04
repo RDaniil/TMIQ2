@@ -82,7 +82,7 @@ namespace Tmiq2.Player
         float m_footstepDistanceCounter;
 
         const float k_JumpGroundingPreventionTime = 0.2f;
-        const float k_GroundCheckDistanceInAir = 0.37f;
+        const float k_GroundCheckDistanceInAir = 0.05f;
 
         // Start is called before the first frame update
         void Start()
@@ -109,7 +109,6 @@ namespace Tmiq2.Player
             hasJumpedThisFrame = false;
             bool wasGrounded = isGrounded;
             GroundCheck();
-            Debug.Log(isGrounded ? "Grounded": "NOt grounded");
 
             // landing
             if (isGrounded && !wasGrounded)
@@ -128,7 +127,6 @@ namespace Tmiq2.Player
             {
                 return;
             }
-            Debug.Log("Jump");
 
             // start by canceling out the vertical component of our velocity
             characterVelocity = new Vector3(characterVelocity.x, 0f, characterVelocity.z);
