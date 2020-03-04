@@ -73,7 +73,6 @@ namespace Tmiq2.Player
         PlayerInputHandler m_InputHandler;
         CharacterController m_Controller;
 
-
         Vector3 m_GroundNormal;
         Vector3 m_CharacterVelocity;
         Vector3 m_LatestImpactSpeed;
