@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6575167433223181628}
   - component: {fileID: 6575167433223181619}
   - component: {fileID: 3817105476900720308}
+  - component: {fileID: 5062800612928702748}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -90,7 +91,18 @@ MonoBehaviour:
     m_ActionId: a5390059-0446-4c66-8e32-9195674b8f25
     m_ActionName: Gameplay/Look
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 5062800612928702748}
+        m_MethodName: CastDash
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 00dfd557-3dd2-47c2-aaaa-36a8daaad737
     m_ActionName: Gameplay/Dash
   - m_PersistentCalls:
@@ -256,6 +268,7 @@ MonoBehaviour:
   jumpSFX: {fileID: 8300000, guid: 13b59a14d34add64d84a623867546ff1, type: 3}
   landSFX: {fileID: 8300000, guid: d0f1afed8fa916244af6ca73579ded67, type: 3}
   fallDamageSFX: {fileID: 8300000, guid: ef980d09b569380459e609fe90ef1db2, type: 3}
+  isDashing: 0
 --- !u!114 &3817105476900720308
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,6 +283,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mat: {fileID: 0}
   range: 10
+--- !u!114 &5062800612928702748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6575167433223181623}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d89ddcd70959364da927f8d678a0bd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dashForce: 5
+  dashDuration: 0.2
+  dashSFX: {fileID: 8300000, guid: 13b59a14d34add64d84a623867546ff1, type: 3}
 --- !u!1 &6575167434693426693
 GameObject:
   m_ObjectHideFlags: 0

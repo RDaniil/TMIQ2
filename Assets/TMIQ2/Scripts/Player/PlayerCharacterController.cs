@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Tmiq2.Player
@@ -28,6 +29,7 @@ namespace Tmiq2.Player
             " a low value will make the player accelerate and " +
             "decelerate slowly, a high value will do the opposite")]
         public float movementSharpnessOnGround = 25;
+
         [Tooltip("Max movement speed when not grounded")]
         public float maxSpeedInAir = 10f;
         [Tooltip("Acceleration speed when in the air")]
@@ -73,13 +75,14 @@ namespace Tmiq2.Player
         PlayerInputHandler m_InputHandler;
         CharacterController m_Controller;
 
+        public bool isDashing = false;
+
         Vector3 m_GroundNormal;
         Vector3 m_CharacterVelocity;
         Vector3 m_LatestImpactSpeed;
         float m_LastTimeJumped = 0f;
         float m_CameraVerticalAngle = 0f;
         float m_footstepDistanceCounter;
-
         const float k_JumpGroundingPreventionTime = 0.2f;
         const float k_GroundCheckDistanceInAir = 0.05f;
 
@@ -182,38 +185,18 @@ namespace Tmiq2.Player
 
 
                 // handle grounded movement
-                if (isGrounded)
+                if (isGrounded && !isDashing)
                 {
-
                     // calculate the desired velocity from inputs, max speed, and current slope
                     Vector3 targetVelocity = worldspaceMoveInput * maxSpeedOnGround;
 
                     targetVelocity = GetDirectionReorientedOnSlope(targetVelocity.normalized,
-                        m_GroundNormal) * targetVelocity.magnitude;
+                    m_GroundNormal) * targetVelocity.magnitude;
 
                     // smoothly interpolate between our current velocity and 
                     // the target velocity based on acceleration speed
                     characterVelocity = Vector3.Lerp(characterVelocity, targetVelocity,
                         movementSharpnessOnGround * Time.deltaTime);
-
-                    //DASH
-                    //if (isGrounded && m_InputHandler.GetJumpInputDown())
-                    //{
-                    //    // force the crouch state to false
-                    //    if (SetCrouchingState(false, false))
-                    //    {
-
-                    //        Debug.Log("Dash");
-                    //        Debug.Log(characterVelocity);
-                    //        characterVelocity += Vector3.Scale(characterVelocity, 10 * new Vector3(1, 1, 1));
-                    //        // start by canceling out the vertical component of our velocity
-                    //        //characterVelocity = new Vector3(0f, 0f, 0f);
-                    //        Debug.Log(characterVelocity);
-
-                    //        // play sound
-                    //        audioSource.PlayOneShot(jumpSFX);
-                    //    }
-                    //}
 
                     // footsteps sound
                     float chosenFootstepSFXFrequency = footstepSFXFrequency;
@@ -232,12 +215,15 @@ namespace Tmiq2.Player
                     // add air acceleration
                     characterVelocity += worldspaceMoveInput * accelerationSpeedInAir * Time.deltaTime;
 
-                    // limit air speed to a maximum, but only horizontally
-                    float verticalVelocity = characterVelocity.y;
-                    Vector3 horizontalVelocity = Vector3.ProjectOnPlane(characterVelocity, Vector3.up);
-                    horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, maxSpeedInAir);
-                    characterVelocity = horizontalVelocity + (Vector3.up * verticalVelocity);
+                    if (!isDashing)
+                    {
+                        // limit air speed to a maximum, but only horizontally
+                        float verticalVelocity = characterVelocity.y;
+                        Vector3 horizontalVelocity = Vector3.ProjectOnPlane(characterVelocity, Vector3.up);
+                        horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, maxSpeedInAir);
+                        characterVelocity = horizontalVelocity + (Vector3.up * verticalVelocity);
 
+                    }
                     // apply the gravity to the velocity
                     characterVelocity += Vector3.down * gravityDownForce * Time.deltaTime;
                 }

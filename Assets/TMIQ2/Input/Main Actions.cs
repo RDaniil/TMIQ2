@@ -42,7 +42,7 @@ namespace Tmiq2.Input
                     ""id"": ""00dfd557-3dd2-47c2-aaaa-36a8daaad737"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """"
+                    ""interactions"": ""Press""
                 },
                 {
                     ""name"": ""Jump"",
