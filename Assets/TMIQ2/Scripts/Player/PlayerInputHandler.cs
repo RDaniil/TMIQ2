@@ -7,7 +7,7 @@ namespace Tmiq2.Player
     {
 
         [Tooltip("Sensitivity multiplier for moving the camera around")]
-        public float lookSensitivity = 0.7f;
+        public float lookSensitivity = 2f;
 
         [Tooltip("Reference to the inpute actions scheme")]
         public MainActions inputActions;
