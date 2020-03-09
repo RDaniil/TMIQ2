@@ -14,8 +14,11 @@ namespace Tmiq2.Player
         public AudioSource audioSource;
 
         [Header("General")]
-        [Tooltip("Force applied downward when in the air")]
-        public float gravityDownForce = 20f;
+        [Tooltip("Gravity multiplier when falling")]
+        public float fallMultiplier = 4.3f;
+        [Tooltip("Gravity multiplier when going up in the air")]
+        public float jumpUpMultiplier = 3f;
+
         [Tooltip("Physic layers checked to consider the player grounded")]
         public LayerMask groundCheckLayers = -1;
         [Tooltip("distance from the bottom of the character " +
@@ -46,6 +49,7 @@ namespace Tmiq2.Player
         [Header("Jump")]
         [Tooltip("Force applied upward when jumping")]
         public float jumpForce = 9f;
+  
 
         [Header("Audio")]
         [Tooltip("Amount of footstep sounds played when moving one meter")]
@@ -187,45 +191,13 @@ namespace Tmiq2.Player
                 // handle grounded movement
                 if (isGrounded && !isDashing)
                 {
-                    // calculate the desired velocity from inputs, max speed, and current slope
-                    Vector3 targetVelocity = worldspaceMoveInput * maxSpeedOnGround;
-
-                    targetVelocity = GetDirectionReorientedOnSlope(targetVelocity.normalized,
-                    m_GroundNormal) * targetVelocity.magnitude;
-
-                    // smoothly interpolate between our current velocity and 
-                    // the target velocity based on acceleration speed
-                    characterVelocity = Vector3.Lerp(characterVelocity, targetVelocity,
-                        movementSharpnessOnGround * Time.deltaTime);
-
-                    // footsteps sound
-                    float chosenFootstepSFXFrequency = footstepSFXFrequency;
-                    if (m_footstepDistanceCounter >= 1f / chosenFootstepSFXFrequency)
-                    {
-                        m_footstepDistanceCounter = 0f;
-                        audioSource.PlayOneShot(footstepSFX);
-                    }
-
-                    // keep track of distance traveled for footsteps sound
-                    m_footstepDistanceCounter += characterVelocity.magnitude * Time.deltaTime;
+                    HandleGroundedCharacterVelocity(worldspaceMoveInput);
+                    HandleFootsteps();
                 }
                 // handle air movement
                 else
                 {
-                    // add air acceleration
-                    characterVelocity += worldspaceMoveInput * accelerationSpeedInAir * Time.deltaTime;
-
-                    if (!isDashing)
-                    {
-                        // limit air speed to a maximum, but only horizontally
-                        float verticalVelocity = characterVelocity.y;
-                        Vector3 horizontalVelocity = Vector3.ProjectOnPlane(characterVelocity, Vector3.up);
-                        horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, maxSpeedInAir);
-                        characterVelocity = horizontalVelocity + (Vector3.up * verticalVelocity);
-
-                    }
-                    // apply the gravity to the velocity
-                    characterVelocity += Vector3.down * gravityDownForce * Time.deltaTime;
+                    HandleAirCharacterVelocity(worldspaceMoveInput);
                 }
             }
 
@@ -242,9 +214,62 @@ namespace Tmiq2.Player
             {
                 // We remember the last impact speed because the fall damage logic might need it
                 m_LatestImpactSpeed = characterVelocity;
-
                 characterVelocity = Vector3.ProjectOnPlane(characterVelocity, hit.normal);
             }
+        }
+
+        private void HandleAirCharacterVelocity(Vector3 worldspaceMoveInput)
+        {
+            // add air acceleration
+            characterVelocity += worldspaceMoveInput * accelerationSpeedInAir * Time.deltaTime;
+
+            if (!isDashing)
+            {
+                // limit air speed to a maximum, but only horizontally
+                float verticalVelocity = characterVelocity.y;
+                Vector3 horizontalVelocity = Vector3.ProjectOnPlane(characterVelocity, Vector3.up);
+                horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, maxSpeedInAir);
+                characterVelocity = horizontalVelocity + (Vector3.up * verticalVelocity);
+
+            }
+
+            if (characterVelocity.y < 0)
+            {
+                // apply the gravity to the velocity
+                characterVelocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+            }
+            else
+            {
+                characterVelocity += Vector3.up * Physics.gravity.y * (jumpUpMultiplier - 1) * Time.deltaTime;
+            }
+        }
+
+        private void HandleFootsteps()
+        {
+            // footsteps sound
+            float chosenFootstepSFXFrequency = footstepSFXFrequency;
+            if (m_footstepDistanceCounter >= 1f / chosenFootstepSFXFrequency)
+            {
+                m_footstepDistanceCounter = 0f;
+                audioSource.PlayOneShot(footstepSFX);
+            }
+
+            // keep track of distance traveled for footsteps sound
+            m_footstepDistanceCounter += characterVelocity.magnitude * Time.deltaTime;
+        }
+
+        private void HandleGroundedCharacterVelocity(Vector3 worldspaceMoveInput)
+        {
+            // calculate the desired velocity from inputs, max speed, and current slope
+            Vector3 targetVelocity = worldspaceMoveInput * maxSpeedOnGround;
+
+            targetVelocity = GetDirectionReorientedOnSlope(targetVelocity.normalized,
+            m_GroundNormal) * targetVelocity.magnitude;
+
+            // smoothly interpolate between our current velocity and 
+            // the target velocity based on acceleration speed
+            characterVelocity = Vector3.Lerp(characterVelocity, targetVelocity,
+                movementSharpnessOnGround * Time.deltaTime);
         }
 
         // Gets the center point of the bottom hemisphere of the character controller capsule    
