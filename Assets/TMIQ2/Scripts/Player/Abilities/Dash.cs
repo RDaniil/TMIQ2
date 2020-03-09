@@ -17,17 +17,20 @@ namespace Tmiq2.Abilities
         public AudioClip dashSFX;
 
         private PlayerCharacterController playerCC;
+        private PlayerInputHandler inputHandler;
 
         private void Awake()
         {
             playerCC = GetComponent<PlayerCharacterController>();
+            inputHandler = GetComponent<PlayerInputHandler>();
         }
 
         public override IEnumerator Cast()
         {
             playerCC.isDashing = true;
-            var playerDirection = playerCC.characterVelocity.normalized;
-            playerCC.characterVelocity = Vector3.Scale(playerDirection, new Vector3(dashForce, 0f, dashForce));
+            //Перевод координат в локальные для игрока
+            var desiredDirection = transform.TransformVector(inputHandler.GetMoveInput());
+            playerCC.characterVelocity = Vector3.Scale(desiredDirection, new Vector3(dashForce, 0f, dashForce));
             // play sound
             playerCC.audioSource.PlayOneShot(dashSFX);
             yield return new WaitForSeconds(dashDuration);
